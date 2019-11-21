@@ -8,7 +8,7 @@ import getFollowings from './apis/getFollowings';
 
 async function fn() {
   setupRequest();
-  getFollowings({ userId: '110379' })
+  getFollowings({ userId: '110379', recursive: true })
     .then(mapper())
     .then(writeToFile(path.resolve('./tmp/following.json')))
     .catch(console.log);
