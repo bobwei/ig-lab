@@ -3,7 +3,7 @@
   "version": "",
   "description": "",
   "scripts": {
-    "dev": "nodemon src/index.js --exec babel-node --ignore tmp/*.*",
+    "dev": "nodemon src/index.js --exec babel-node --ignore './tmp/'",
     "start": "node lib/index.js",
     "build": "yarn clean && babel src --out-dir lib --copy-files",
     "test": "jest",
