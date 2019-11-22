@@ -11,14 +11,10 @@ import createTaskQueue from './utilities/task-queue';
 
 class DataLoader {
   constructor(props) {
-    const { userId, cookie } = props;
-    this.userId = userId;
-    this.cookie = cookie;
     setupRequest(props);
   }
 
-  async load() {
-    const { userId } = this;
+  async load({ userId } = {}) {
     if (!fs.existsSync(path.resolve('./tmp/followings.json'))) {
       const mapper = R.pipe(
         R.pathOr([], ['data', 'user', 'edge_follow', 'edges']),
