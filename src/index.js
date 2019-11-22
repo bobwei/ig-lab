@@ -9,23 +9,24 @@ import writeToFile from './functions/writeToFile';
 import setupRequest from './functions/setupRequest';
 import createTaskQueue from './utilities/task-queue';
 
-async function fn() {
-  setupRequest();
+async function createDataLoader(props) {
+  const { userId } = props;
+  setupRequest(props);
   if (!fs.existsSync(path.resolve('./tmp/followings.json'))) {
     const mapper = R.pipe(
       R.pathOr([], ['data', 'user', 'edge_follow', 'edges']),
       R.map(R.prop('node')),
     );
-    await getFollowings({ userId: '110379', recursive: true })
+    await getFollowings({ userId, recursive: true })
       .then(mapper)
       .then(writeToFile(path.resolve('./tmp/followings.json')))
       .catch(console.log);
   }
   if (!fs.existsSync(path.resolve('./tmp/posts.json'))) {
-    await new Promise((resolve) => {
-      const followings = JSON.parse(fs.readFileSync('./tmp/followings.json')).slice(0, 50);
+    return new Promise((resolve) => {
+      const followings = JSON.parse(fs.readFileSync('./tmp/followings.json')).slice(0, 1);
       // prettier-ignore
-      const props = [
+      const pickedProps = [
         'id', 'display_url', 'edge_media_to_caption', 'shortcode', 'edge_media_preview_like',
         'owner', 'location'
       ]
@@ -33,7 +34,7 @@ async function fn() {
         R.pathOr([], ['data', 'user', 'edge_owner_to_timeline_media', 'edges']),
         R.map(R.prop('node')),
         R.reject(R.propEq('location', null)),
-        R.map(R.pick(props)),
+        R.map(R.pick(pickedProps)),
       );
       const arr = [];
       const queue = createTaskQueue({
@@ -44,7 +45,7 @@ async function fn() {
           console.log(queue.status);
           if (queue.isComplete) {
             console.log('arr.length =', arr.length);
-            resolve();
+            resolve(arr);
           }
         },
       });
@@ -53,6 +54,4 @@ async function fn() {
   }
 }
 
-if (require.main === module) {
-  fn();
-}
+export default createDataLoader;
